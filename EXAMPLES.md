@@ -100,19 +100,181 @@ git log --all -S "your-sensitive-text" --oneline
 grep -r "your-sensitive-text" . --include="*.py" --include="*.md"
 ```
 
-### Test on Repository Copy
+### Complete Testing Procedure
+
+Want to test the Git History Cleaner safely? This repository includes pre-made test files to demonstrate the script's functionality.
+
+#### Quick Test with Included Files
+
+This repository already contains test files (`test-config.json` and `test-docs.md`) that show the results of the cleanup process:
 
 ```powershell
-# Create a test copy
-git clone /path/to/original /path/to/test-copy
-cd /path/to/test-copy
+# View the current test files (already contain redacted content)
+Get-Content test-config.json
+Get-Content test-docs.md
 
-# Run cleaner on test copy
-.\Clean-GitHistory.ps1 -TextToRemove "sensitive-text" -Force
-
-# Verify results
-git log --all -S "sensitive-text" --oneline  # Should return no results
+# Check git history to see the cleanup was successful
+git log --oneline
+git log -S "SECRET-API-KEY-12345" --all  # Should return no results
+git log -S "[REDACTED-API-KEY]" --all    # Should find the commits
 ```
+
+#### Creating Your Own Test
+
+To test the script yourself with fresh content, follow this step-by-step procedure:
+
+#### Step 1: Create Test Environment
+
+```powershell
+# Create a test branch
+git checkout -b my-test-cleanup
+
+# Create NEW test files with sensitive content (different from included ones)
+```
+
+Create `my-test-config.json`:
+```json
+{
+  "database_connection": "mongodb://user:password123@localhost:27017/testdb",
+  "api_key": "MY-NEW-SECRET-KEY-789",
+  "secret_token": "super-secret-token-xyz789",
+  "admin_token": "MY-NEW-SECRET-KEY-789",
+  "backup_key": "MY-NEW-SECRET-KEY-789"
+}
+```
+
+Create `my-test-docs.md`:
+```markdown
+# My Test Documentation
+
+This is a test document for demonstrating git history cleanup.
+
+## Configuration  
+- Database: MY-NEW-SECRET-KEY-789 should not be exposed
+- Token: MY-NEW-SECRET-KEY-789 is used for authentication
+- Key: MY-NEW-SECRET-KEY-789 provides access to the system
+
+## Usage Examples
+\```bash
+export API_KEY="MY-NEW-SECRET-KEY-789"
+curl -H "Authorization: Bearer MY-NEW-SECRET-KEY-789" https://api.example.com
+\```
+
+## Additional Security Notes
+Never commit MY-NEW-SECRET-KEY-789 to version control!
+The MY-NEW-SECRET-KEY-789 should be stored in environment variables.
+#### Step 2: Create Git History
+
+```powershell
+# Add and commit the NEW test files
+git add my-test-*.json my-test-*.md
+git commit -m "Add my test files with sensitive API keys
+
+- my-test-config.json contains multiple MY-NEW-SECRET-KEY-789 references
+- my-test-docs.md contains documentation with MY-NEW-SECRET-KEY-789 
+- This commit creates history that needs to be cleaned"
+```
+
+#### Step 3: Verify Sensitive Content Exists
+
+```powershell
+# Search for the sensitive content in git history
+git log --all -S "MY-NEW-SECRET-KEY-789" --oneline
+# Should show the new commit with your test files
+
+# Verify content in files
+Get-Content my-test-config.json | Select-String "MY-NEW-SECRET-KEY-789"
+Get-Content my-test-docs.md | Select-String "MY-NEW-SECRET-KEY-789"
+```
+
+#### Step 4: Run the Git History Cleaner
+
+```powershell
+# Run the cleaner (use -Force to skip confirmation in testing)
+.\Clean-GitHistory.ps1 -TextToRemove "MY-NEW-SECRET-KEY-789" -ReplacementText "[MY-REDACTED-KEY]" -Force
+```
+
+Expected output:
+```
+🧹 Generic Git History Cleaner
+==============================
+📋 Text to remove: 'MY-NEW-SECRET-KEY-789'
+📋 Replacement text: '[MY-REDACTED-KEY]'
+📋 File patterns: *.py,*.bat,*.md,*.txt,*.json
+📋 Backup branch: backup-before-cleanup-TIMESTAMP
+💾 Creating backup branch...
+✅ Backup branch created successfully
+🔍 Searching for commits containing the text...
+Found affected commits:
+  a1b2c3d Add my test files with sensitive API keys
+🚀 Starting git history cleanup...
+...
+✅ Git history cleanup completed successfully! 🎉
+```
+
+#### Step 5: Verify Complete Removal
+
+```powershell
+# Search for any remaining instances (should return nothing)
+git log --all -S "MY-NEW-SECRET-KEY-789" --oneline
+
+# Verify replacement text exists (should find the commit)
+git log --all -S "[MY-REDACTED-KEY]" --oneline
+
+# Check file contents after cleanup
+Get-Content my-test-config.json | Select-String "MY-REDACTED-KEY"
+Get-Content my-test-docs.md | Select-String "MY-REDACTED-KEY"
+```
+
+#### Step 6: Cleanup Test Environment
+
+```powershell
+# Switch back to main branch
+git checkout main  # or 'master'
+
+# Delete test branch
+git branch -D my-test-cleanup
+
+# Delete backup branch (when satisfied with results)
+git branch -D backup-before-cleanup-*
+
+# Remove test files from working directory
+Remove-Item my-test-config.json, my-test-docs.md -Force
+```
+
+### Expected Results
+
+✅ **Before Cleanup:**
+- `git log -S "MY-NEW-SECRET-KEY-789"` finds 1 commit
+- Files contain multiple instances of sensitive text
+
+✅ **After Cleanup:**
+- `git log -S "MY-NEW-SECRET-KEY-789"` returns no results
+- All instances replaced with `[MY-REDACTED-KEY]`
+- Original content completely removed from git history
+- Backup branch preserves original state for safety
+
+### Troubleshooting
+
+If the test doesn't work as expected:
+
+1. **Check PowerShell execution policy:**
+   ```powershell
+   Get-ExecutionPolicy
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+   ```
+
+2. **Verify Git is available:**
+   ```powershell
+   git --version
+   ```
+
+3. **Check for Git Bash (required for filter-branch):**
+   ```powershell
+   bash --version
+   ```
+
+4. **Review error messages in the script output**
 
 ## 📋 Pre-Cleanup Checklist
 
@@ -141,8 +303,40 @@ grep -r "REDACTED" . --include="*.py"
 git push --force-with-lease
 
 # 4. Clean up backup branch (when satisfied)
-git branch -D backup-before-cleanup-TIMESTAMP
+git branch -D backup-before-cleanup-*
 ```
+
+## 📁 Included Test Files
+
+This repository includes demonstration files that show the script's functionality:
+
+### `test-config.json`
+Contains configuration with redacted API keys showing successful cleanup of:
+- Multiple instances of `SECRET-API-KEY-12345` → `[REDACTED-API-KEY]`
+- Database connections and authentication tokens
+
+### `test-docs.md`  
+Contains documentation with redacted sensitive information showing:
+- Code examples with cleaned API keys
+- Security notes with redacted tokens
+- Multiple reference patterns successfully cleaned
+
+### Viewing Test Results
+```powershell
+# See the cleaned content
+Get-Content test-config.json
+Get-Content test-docs.md
+
+# Verify no sensitive content remains in git history  
+git log -S "SECRET-API-KEY-12345" --all  # Should return no results
+git log -S "[REDACTED-API-KEY]" --all    # Should show the cleanup commits
+```
+
+These files demonstrate that the Git History Cleaner successfully:
+- ✅ Removed all instances of sensitive content from git history
+- ✅ Replaced sensitive text with safe placeholder text
+- ✅ Maintained file structure and formatting
+- ✅ Preserved commit history while cleaning content
 
 ## ⚠️ Common Pitfalls
 
