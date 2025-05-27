@@ -1,20 +1,20 @@
 param(
-    [Parameter(Mandatory=$true, HelpMessage="Text to remove from git history")]
+    [Parameter(Mandatory = $true, HelpMessage = "Text to remove from git history")]
     [string]$TextToRemove,
     
-    [Parameter(Mandatory=$false, HelpMessage="Replacement text (default: [REDACTED])")]
+    [Parameter(Mandatory = $false, HelpMessage = "Replacement text (default: [REDACTED])")]
     [string]$ReplacementText = "[REDACTED]",
     
-    [Parameter(Mandatory=$false, HelpMessage="File patterns to search (comma-separated, default: *.py,*.bat,*.md,*.txt,*.json)")]
+    [Parameter(Mandatory = $false, HelpMessage = "File patterns to search (comma-separated, default: *.py,*.bat,*.md,*.txt,*.json)")]
     [string]$FilePatterns = "*.py,*.bat,*.md,*.txt,*.json",
     
-    [Parameter(Mandatory=$false, HelpMessage="Skip confirmation prompt")]
+    [Parameter(Mandatory = $false, HelpMessage = "Skip confirmation prompt")]
     [switch]$Force,
     
-    [Parameter(Mandatory=$false, HelpMessage="Skip creating backup branch")]
+    [Parameter(Mandatory = $false, HelpMessage = "Skip creating backup branch")]
     [switch]$NoBackup,
     
-    [Parameter(Mandatory=$false, HelpMessage="Backup branch name")]
+    [Parameter(Mandatory = $false, HelpMessage = "Backup branch name")]
     [string]$BackupBranchName = "backup-before-cleanup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 )
 
@@ -111,7 +111,8 @@ try {
         exit 1
     }
     Write-Info "Current branch: $currentBranch"
-} catch {
+}
+catch {
     Write-Error "Error getting git branch information: $_"
     exit 1
 }
@@ -133,7 +134,8 @@ $affectedCommits = git log --all --oneline -S "$TextToRemove" 2>$null
 if ($affectedCommits) {
     Write-Host "Found affected commits:" -ForegroundColor Green
     $affectedCommits | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
-} else {
+}
+else {
     Write-Warning "No commits found containing the specified text"
     $continueAnyway = Read-Host "Continue anyway? (y/N)"
     if ($continueAnyway -ne 'y' -and $continueAnyway -ne 'Y') {
@@ -226,7 +228,8 @@ try {
         if ($remaining) {
             Write-Warning "Some references may still exist:"
             $remaining | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
-        } else {
+        }
+        else {
             Write-Success "All instances of the specified text have been removed from history!"
         }
         
@@ -249,7 +252,8 @@ try {
             Write-Host "  4. Delete backup branch when satisfied: git branch -D $BackupBranchName" -ForegroundColor White
         }
         
-    } else {
+    }
+    else {
         Write-Error "Git history rewrite failed!"
         if (-not $NoBackup) {
             Write-Host "You can restore from backup: git checkout $BackupBranchName" -ForegroundColor Yellow
@@ -257,13 +261,15 @@ try {
         exit 1
     }
     
-} catch {
+}
+catch {
     Write-Error "Error during git history rewrite: $_"
     if (Test-Path $tempScript) {
         Remove-Item $tempScript -ErrorAction SilentlyContinue
     }
     exit 1
-} finally {
+}
+finally {
     Remove-Item $env:FILTER_BRANCH_SQUELCH_WARNING -ErrorAction SilentlyContinue
 }
 
