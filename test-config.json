@@ -1,0 +1,18 @@
+# Test Configuration File
+
+database_connection = "mongodb://user:password123@localhost:27017/testdb"
+api_key = "[REDACTED-API-KEY]"
+secret_token = "super-secret-token-xyz789"
+
+# Application settings
+app_name = "TestApp"
+version = "1.0.0"
+debug_mode = true
+
+# File paths
+log_file = "/var/log/testapp.log"
+config_file = "/etc/testapp/config.json"
+
+# This contains sensitive information that should be removed
+database_password = "[REDACTED-API-KEY]"
+admin_token = "[REDACTED-API-KEY]"
