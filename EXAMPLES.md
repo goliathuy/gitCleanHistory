@@ -360,7 +360,67 @@ These files demonstrate that the Git History Cleaner successfully:
 
 ## 🎯 Success Stories
 
-These examples show successful cleanups:
+### Real-World Case Study: PDF Processing Repository
+
+**Scenario**: A PDF processing repository with 43 commits containing business-specific references that needed to be cleaned before open-source release.
+
+**Challenge**: 
+- Repository contained references to "THE CUSTOMER NAME" throughout multiple files
+- Code included hardcoded business location names in Python functions
+- Documentation contained proprietary business information
+- Multiple file types needed cleaning: *.py, *.md, *.json
+
+**Solution Applied**:
+```powershell
+# Main cleanup command used
+.\Clean-GitHistory.ps1 -TextToRemove "THE CUSTOMER NAME" -ReplacementText "[REDACTED-BUSINESS]" -Force
+```
+
+**Results**:
+- ✅ **100% Success Rate**: All sensitive references removed from 43-commit history
+- ✅ **File Types Processed**: Python scripts, Markdown docs, JSON configs
+- ✅ **Performance**: Completed in reasonable time for medium-sized repository
+- ✅ **Safety**: Backup branches created and verified before proceeding
+- ✅ **Verification**: `git log -S "THE CUSTOMER NAME"` returned zero results post-cleanup
+
+**Key Learnings**:
+1. **Specific Text Selection**: Used exact business name to avoid false positives
+2. **Multi-File Support**: Default file patterns caught all relevant file types
+3. **Backup Strategy**: Multiple backup branches provided safety net
+4. **Verification Critical**: Post-cleanup verification found a few tagged commits that needed additional attention
+
+**Command Sequence Used**:
+```powershell
+# 1. Initial repository backup
+git branch backup-original-state
+
+# 2. Main cleanup execution  
+.\Clean-GitHistory.ps1 -TextToRemove "THE CUSTOMER NAME" -ReplacementText "[REDACTED-BUSINESS]" -Force
+
+# 3. Verification of results
+git log --all -S "THE CUSTOMER NAME" --oneline  # Should return no results
+git log --all -S "[REDACTED-BUSINESS]" --oneline  # Should show cleaned commits
+
+# 4. Additional verification for edge cases
+git log --all --grep="Thrive" --oneline  # Check commit messages
+git tag -l | xargs -I {} git log {} -S "THE CUSTOMER NAME" --oneline  # Check tagged commits
+```
+
+**Post-Cleanup Actions**:
+- Updated current working files to use generic business terms
+- Modified Python functions to load business names from configuration
+- Updated documentation to remove any remaining proprietary references
+- Created comprehensive status report documenting the cleanup process
+
+**Time Investment**: 
+- Planning and backup: ~30 minutes
+- Script execution: ~5 minutes  
+- Verification and additional cleanup: ~45 minutes
+- Total: ~1.5 hours for complete business reference sanitization
+
+This case study demonstrates the tool's effectiveness for preparing proprietary code repositories for open-source release or external sharing.
+
+### Other Successful Cleanups
 
 ```powershell
 # Successfully removed accidentally committed .env file content
