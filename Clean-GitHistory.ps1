@@ -114,28 +114,28 @@ $patterns = $FilePatterns -split ',' | ForEach-Object { $_.Trim() }
 
 # Build a more robust PowerShell script
 $scriptContent = @"
-`$ErrorActionPreference = 'SilentlyContinue'
+`$ErrorActionPreference = 'Continue'
 `$textToRemove = '$($TextToRemove -replace "'", "''")'
 `$replacementText = '$($ReplacementText -replace "'", "''")'
 `$patterns = @('$($patterns -join "', '")')
 
 foreach (`$pattern in `$patterns) {
-    Get-ChildItem -Path . -Filter `$pattern -Recurse -File | ForEach-Object {
+    Get-ChildItem -Path . -Filter `$pattern -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
         try {
             `$file = `$_.FullName
+            `$relativePath = `$_.Name
             if (Test-Path `$file -PathType Leaf) {
-                `$encoding = 'UTF8'
-                `$content = Get-Content `$file -Raw -Encoding `$encoding -ErrorAction SilentlyContinue
+                `$content = Get-Content `$file -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
                 if (`$content -and (`$content -match [regex]::Escape(`$textToRemove))) {
                     `$newContent = `$content -replace [regex]::Escape(`$textToRemove), `$replacementText
                     if (`$newContent -ne `$content) {
-                        Set-Content `$file `$newContent -NoNewline -Encoding `$encoding -ErrorAction SilentlyContinue
-                        Write-Host "Updated: `$file"
+                        Set-Content `$file `$newContent -NoNewline -Encoding UTF8 -ErrorAction SilentlyContinue
+                        Write-Host "Updated: `$relativePath"
                     }
                 }
             }
         } catch {
-            # Ignore errors for binary files or encoding issues
+            # Silently ignore binary files or encoding issues
         }
     }
 }
@@ -148,8 +148,8 @@ Write-Host "🔄 Rewriting git history..." -ForegroundColor Yellow
 $env:FILTER_BRANCH_SQUELCH_WARNING = "1"
 
 try {
-    # Use index-filter instead of tree-filter for better performance
-    git filter-branch --force --index-filter "git rm --cached --ignore-unmatch *; git reset --mixed HEAD" --tree-filter "powershell.exe -ExecutionPolicy Bypass -NoProfile -File `"$tempScript`"" --prune-empty -- --all
+    # Use tree-filter to modify file contents in each commit
+    git filter-branch --force --tree-filter "powershell.exe -ExecutionPolicy Bypass -NoProfile -File `"$tempScript`"" --prune-empty -- --all
     
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Git history rewrite completed successfully!"

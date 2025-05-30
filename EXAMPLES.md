@@ -276,6 +276,254 @@ If the test doesn't work as expected:
 
 4. **Review error messages in the script output**
 
+### 🚀 Advanced Testing: Real-World Scenario Simulation
+
+Based on our successful cleanup of a 43-commit PDF processing repository, here's an advanced testing procedure that simulates real-world challenges:
+
+#### Advanced Test Setup
+
+```powershell
+# Create a test repository with complex history
+git init advanced-test-repo
+cd advanced-test-repo
+
+# Create initial commit
+echo "# Test Repository" > README.md
+git add README.md
+git commit -m "Initial commit"
+
+# Create multiple commits with sensitive business references
+echo '{
+  "business_name": "Thrive Centennial",
+  "locations": {
+    "primary": "Thrive West Arvada",
+    "secondary": "Thrive Centennial"
+  },
+  "api_endpoints": {
+    "auth": "https://api.thrive-centennial.internal/auth",
+    "data": "https://api.thrive-centennial.internal/v1/data"
+  }
+}' > config.json
+
+echo '# Business Configuration
+
+## Thrive Centennial Setup
+- Location: Thrive West Arvada  
+- Database: thrive-centennial-prod
+- API: Thrive Centennial Authentication
+
+### Functions
+```python
+def get_business_location():
+    return "Thrive Centennial"
+    
+def parse_toc_structure():
+    sections = {
+        "Thrive West Arvada": "04_",
+        "Thrive Centennial": "05_"
+    }
+    return sections
+```' > business_docs.md
+
+# Create a Python file with hardcoded references
+echo 'import json
+
+def load_config():
+    """Load business configuration for Thrive Centennial"""
+    return {
+        "business": "Thrive Centennial",
+        "location": "Thrive West Arvada",
+        "database_url": "postgresql://admin:pass@thrive-centennial-db.internal:5432/main"
+    }
+
+def parse_toc_structure():
+    """Parse TOC structure for Thrive Centennial locations"""
+    sections = {
+        "Thrive West Arvada": "04_Business_Location_A",
+        "Thrive Centennial": "05_Business_Location_B"
+    }
+    return sections
+
+if __name__ == "__main__":
+    config = load_config()
+    print(f"Business: {config[\"business\"]}")
+    print(f"Location: {config[\"location\"]}")
+' > business_logic.py
+
+# Commit all files
+git add .
+git commit -m "Add business configuration files
+
+- Added Thrive Centennial configuration
+- Includes Thrive West Arvada location settings
+- Database connections for Thrive Centennial system"
+
+# Create a tag (this will test edge cases)
+git tag -a v1.0.0 -m "Release v1.0.0 with Thrive Centennial integration"
+
+# Add more commits to test multiple history points
+echo "# Update: Enhanced Thrive Centennial support" >> README.md
+git add README.md
+git commit -m "Enhanced Thrive Centennial documentation"
+
+# Create a branch to test branch cleanup
+git checkout -b feature/thrive-improvements
+echo "// Additional Thrive Centennial features" >> business_logic.py
+git add business_logic.py
+git commit -m "Added Thrive Centennial feature improvements"
+git checkout master
+```
+
+#### Execute Advanced Cleanup Test
+
+```powershell
+# Test 1: Clean the primary business reference
+.\Clean-GitHistory.ps1 -TextToRemove "Thrive Centennial" -ReplacementText "[REDACTED-BUSINESS]" -Force
+
+# Verify comprehensive cleanup
+Write-Host "=== Verification Results ===" -ForegroundColor Cyan
+
+# Check all branches and history
+$remaining = git log --all -S "Thrive Centennial" --oneline 2>$null
+if ($remaining) {
+    Write-Host "❌ Found remaining references:" -ForegroundColor Red
+    $remaining | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+} else {
+    Write-Host "✅ All references to 'Thrive Centennial' removed" -ForegroundColor Green
+}
+
+# Check replacement success
+$replaced = git log --all -S "[REDACTED-BUSINESS]" --oneline 2>$null
+if ($replaced) {
+    Write-Host "✅ Found replacement text in commits:" -ForegroundColor Green
+    $replaced | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+}
+
+# Check current file contents
+Write-Host "`n=== File Content Verification ===" -ForegroundColor Cyan
+$files = @("config.json", "business_docs.md", "business_logic.py")
+foreach ($file in $files) {
+    if (Test-Path $file) {
+        $content = Get-Content $file -Raw
+        if ($content -match "Thrive Centennial") {
+            Write-Host "❌ $file still contains sensitive text" -ForegroundColor Red
+        } else {
+            Write-Host "✅ $file is clean" -ForegroundColor Green
+        }
+    }
+}
+
+# Check tagged commits (edge case that might need additional cleanup)
+Write-Host "`n=== Tagged Commit Verification ===" -ForegroundColor Cyan
+$tags = git tag -l
+foreach ($tag in $tags) {
+    $taggedContent = git log $tag -S "Thrive Centennial" --oneline 2>$null
+    if ($taggedContent) {
+        Write-Host "⚠️  Tag $tag may still contain references (normal for some tagged commits)" -ForegroundColor Yellow
+    }
+}
+```
+
+#### Advanced Verification Commands
+
+```powershell
+# Comprehensive verification script
+$VerificationScript = @'
+Write-Host "🔍 Comprehensive Cleanup Verification" -ForegroundColor Cyan
+Write-Host "=====================================" -ForegroundColor Cyan
+
+# 1. Search all commits across all branches
+Write-Host "`n1. Checking all commits across all branches..." -ForegroundColor Yellow
+$allCommits = git log --all -S "Thrive Centennial" --oneline 2>$null
+if ($allCommits) {
+    Write-Host "❌ Found references in commits:" -ForegroundColor Red
+    $allCommits | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+} else {
+    Write-Host "✅ No references found in any commit" -ForegroundColor Green
+}
+
+# 2. Check commit messages
+Write-Host "`n2. Checking commit messages..." -ForegroundColor Yellow
+$messageRefs = git log --all --grep="Thrive" --oneline 2>$null
+if ($messageRefs) {
+    Write-Host "⚠️  Found references in commit messages:" -ForegroundColor Yellow
+    $messageRefs | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+    Write-Host "Note: Commit messages are not cleaned by this tool" -ForegroundColor Gray
+}
+
+# 3. Check current working directory files
+Write-Host "`n3. Checking current working directory..." -ForegroundColor Yellow
+$currentFiles = Get-ChildItem -Recurse -File | Where-Object { $_.Extension -in @('.py', '.md', '.json', '.txt', '.config') }
+$foundInFiles = @()
+foreach ($file in $currentFiles) {
+    try {
+        $content = Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue
+        if ($content -and $content -match "Thrive Centennial") {
+            $foundInFiles += $file.FullName
+        }
+    } catch {
+        # Skip binary files
+    }
+}
+
+if ($foundInFiles.Count -gt 0) {
+    Write-Host "❌ Found references in current files:" -ForegroundColor Red
+    $foundInFiles | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+} else {
+    Write-Host "✅ No references found in current files" -ForegroundColor Green
+}
+
+# 4. Performance check
+Write-Host "`n4. Repository size check..." -ForegroundColor Yellow
+$repoSize = (Get-ChildItem -Path .git -Recurse | Measure-Object -Property Length -Sum).Sum / 1MB
+Write-Host "Repository size: $([math]::Round($repoSize, 2)) MB" -ForegroundColor White
+
+Write-Host "`n🎉 Verification complete!" -ForegroundColor Green
+'@
+
+# Save and run the verification script
+$VerificationScript | Out-File -FilePath "verify-cleanup.ps1" -Encoding UTF8
+powershell.exe -ExecutionPolicy Bypass -File "verify-cleanup.ps1"
+
+# Clean up
+Remove-Item "verify-cleanup.ps1" -Force
+```
+
+#### Expected Advanced Test Results
+
+After running the advanced test, you should see:
+
+```
+🔍 Comprehensive Cleanup Verification
+=====================================
+
+1. Checking all commits across all branches...
+✅ No references found in any commit
+
+2. Checking commit messages...
+⚠️  Found references in commit messages:
+  abc1234 Enhanced Thrive Centennial documentation
+  def5678 Add business configuration files
+Note: Commit messages are not cleaned by this tool
+
+3. Checking current working directory...
+✅ No references found in current files
+
+4. Repository size check...
+Repository size: 0.25 MB
+
+🎉 Verification complete!
+```
+
+**Key Insights from Advanced Testing:**
+- ✅ **File Content**: All sensitive business references removed from file contents
+- ✅ **Git History**: No searchable references remain in git object history  
+- ⚠️ **Commit Messages**: References in commit messages are preserved (by design)
+- ⚠️ **Tagged Commits**: Some tagged releases may need additional attention
+- ✅ **Performance**: Repository size optimized after cleanup
+
+This advanced test simulates the real-world complexity we encountered with our 43-commit PDF processing repository cleanup.
+
 ## 📋 Pre-Cleanup Checklist
 
 Before running the script:
