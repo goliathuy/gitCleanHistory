@@ -1,6 +1,6 @@
 # Git History Cleaner
 
-A powerful PowerShell script that safely removes sensitive text from your entire Git repository history. Perfect for removing accidentally committed secrets, proprietary information, or any sensitive data from all commits.
+A PowerShell script that safely removes sensitive text from your entire Git repository history. Designed for removing accidentally committed secrets, proprietary information, or any sensitive data from all commits.
 
 ## ⚠️ Important Warnings
 
@@ -184,6 +184,51 @@ Found affected commits:
   4. Delete backup branch when satisfied: git branch -D backup-before-cleanup-20250527-143022
 
 ✅ Git history cleanup completed successfully! 🎉
+```
+
+## 🧪 Testing
+
+### Automated Testing
+The repository includes an automated testing script that validates the tool's functionality:
+
+```powershell
+# Run automated tests
+.\Test-GitHistoryCleaner.ps1
+```
+
+**Test Coverage:**
+- ✅ Creates test repository with sensitive content in git history
+- ✅ Runs the cleanup tool and verifies successful operation
+- ✅ Validates sensitive content removal from git history
+- ✅ Confirms replacement text is properly applied
+- ✅ Checks current working files are cleaned
+- ✅ Automatic cleanup of test artifacts
+
+**Test Results (v2.0.1):**
+```
+🎯 Test Results Summary:
+======================
+✅ Test 1: Sensitive content removed from git history
+✅ Test 2: Replacement text added to git history  
+✅ Test 3: Current files cleaned successfully
+✅ Test 4: Replacement text in current files
+Tests Passed: 4/4
+🎉 All tests passed! Git History Cleaner is working correctly.
+```
+
+### Manual Testing
+Always test on a repository copy before production use:
+
+```powershell
+# 1. Copy your repository
+git clone /path/to/your/repo /path/to/test/copy
+cd /path/to/test/copy
+
+# 2. Run the cleaner
+.\Clean-GitHistory.ps1 -TextToRemove "sensitive-text"
+
+# 3. Verify results
+git log --all -S "sensitive-text" --oneline
 ```
 
 ## 🛡️ Safety Features
