@@ -1,30 +1,28 @@
-# GitCleanHistory v2.0.1 - Critical Fix with Automated Testing
+# GitCleanHistory v2.0.1 - First Public Release
 
-## 🚀 What's New
+## 🎉 Welcome to GitCleanHistory!
 
-### 🔧 Critical Fix - git filter-branch Implementation
-- **Fixed**: git filter-branch operation that was preventing content replacement
-- **Removed**: Conflicting `--index-filter` that interfered with `--tree-filter`
-- **Result**: Tool now successfully removes sensitive content from git history
-- **Impact**: 100% success rate in automated testing
+A reliable PowerShell tool for removing sensitive content from git repository history while preserving project structure and functionality.
 
-### 🧪 Automated Testing Infrastructure
-- **Added**: Comprehensive `Test-GitHistoryCleaner.ps1` validation script
-- **Coverage**: 4 test scenarios validating complete functionality
-- **Results**: All tests passing with 100% success rate
-- **Benefits**: Ensures reliability and enables regression testing
+## ✨ Key Features
 
-### 📚 Enhanced Documentation
-- **Updated**: README.md with real-world testing results and technical details
-- **Added**: Comprehensive automated testing section with coverage details
-- **Created**: CHANGELOG.md with complete version history
-- **Enhanced**: Professional language throughout all documentation
+### 🔧 Comprehensive Git History Cleaning
+- **Content Removal**: Safely removes sensitive text from all commits in git history
+- **Smart Replacement**: Replaces sensitive content with configurable replacement text
+- **File Processing**: Cleans both git history and current working files
+- **Backup Protection**: Automatically creates timestamped backup branches before operations
 
-## 🎯 Why This Release Matters
+### 🧪 Automated Testing & Validation
+- **Built-in Testing**: Comprehensive `Test-GitHistoryCleaner.ps1` validation script
+- **4-Test Coverage**: Validates git history cleaning, content replacement, and file processing
+- **Reliability Assurance**: Ensures the tool works correctly before you rely on it
+- **Production Ready**: Tested on real-world repositories with verified results
 
-This version fixes a critical issue where the git filter-branch operation was not properly replacing content in files. The tool now reliably removes sensitive content from git history with comprehensive validation.
-
-**Real-world testing**: Successfully cleaned a 43-commit PDF processing repository with 100% success rate.
+### 🛡️ Safety & Reliability
+- **Safe Operations**: Non-destructive approach with automatic backups
+- **Error Handling**: Robust error detection and user-friendly messages
+- **Confirmation Prompts**: Interactive confirmations with force override option
+- **UTF-8 Support**: Properly handles international characters and special content
 
 ## 📋 Installation & Usage
 
@@ -38,12 +36,9 @@ iex (irm "https://raw.githubusercontent.com/goliathuy/gitCleanHistory/master/Ins
 ```powershell
 # Download main script
 Invoke-WebRequest -Uri "https://github.com/goliathuy/gitCleanHistory/releases/download/v2.0.1/Clean-GitHistory.ps1" -OutFile "Clean-GitHistory.ps1"
-
-# Download test script (optional)
-Invoke-WebRequest -Uri "https://github.com/goliathuy/gitCleanHistory/releases/download/v2.0.1/Test-GitHistoryCleaner.ps1" -OutFile "Test-GitHistoryCleaner.ps1"
 ```
 
-### Basic Usage
+### Basic Usage Examples
 ```powershell
 # Remove sensitive API key
 .\Clean-GitHistory.ps1 -TextToRemove "sk-1234567890abcdef"
@@ -67,17 +62,26 @@ Verify the installation works correctly:
 🎯 Test Results Summary:
 ======================
 ✅ Test 1: Sensitive content removed from git history
-✅ Test 2: Replacement text added to git history
+✅ Test 2: Replacement text added to git history  
 ✅ Test 3: Current files cleaned successfully
 ✅ Test 4: Replacement text in current files
 Tests Passed: 4/4
 🎉 All tests passed! Git History Cleaner is working correctly.
 ```
 
+## 🎯 Use Cases
+
+Perfect for:
+- **API Key Removal**: Remove accidentally committed API keys, tokens, or secrets
+- **Server Information**: Clean internal server names, IPs, or domain references  
+- **Business Information**: Remove company names, client details, or proprietary data
+- **Development Cleanup**: Prepare repositories for open-source publication
+- **Compliance**: Meet data protection requirements by removing sensitive content
+
 ## ⚠️ Important Safety Notes
 
 - **Backup Creation**: Tool automatically creates timestamped backup branches
-- **History Rewrite**: All commit hashes will change after cleanup
+- **History Rewrite**: All commit hashes will change after cleanup (this is normal)
 - **Team Coordination**: Notify collaborators before using on shared repositories
 - **Test First**: Always test on a repository copy before production use
 
@@ -88,16 +92,16 @@ Tests Passed: 4/4
 - **Changelog**: [CHANGELOG.md](https://github.com/goliathuy/gitCleanHistory/blob/master/CHANGELOG.md)
 - **Issues**: Report bugs or request features in [Issues](https://github.com/goliathuy/gitCleanHistory/issues)
 
-## 🎉 Community
+## 🤝 Contributing
 
 Help us improve GitCleanHistory:
 - ⭐ **Star** this repository if you find it useful
-- 🐛 **Report bugs** via GitHub Issues
+- 🐛 **Report bugs** via GitHub Issues  
 - 💡 **Suggest features** for future releases
 - 🤝 **Contribute** via Pull Requests
 
 ---
 
-**Download the assets below** or use the installation commands above to get started!
+**Download the assets below** to get started with GitCleanHistory!
 
-> **Note**: This release has been extensively tested and verified working with automated test suite. Safe for production use with proper backup procedures.
+> **Note**: This tool has been tested and verified working with automated test suite. Ready for production use with proper backup procedures.
